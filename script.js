@@ -1,106 +1,27 @@
-// 🎀 Countdown to the 27th (ends on 26th)
+// Countdown
 const countdownEl = document.getElementById("countdown");
 const targetDate = new Date("2025-10-27T00:00:00");
 const now = new Date();
 const timeDiff = targetDate - now;
 const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-countdownEl.textContent = `Countdown: ${daysLeft} day${daysLeft !== 1 ? "s" : ""} left until Marianna's birthday!`;
+countdownEl.textContent = `Countdown: ${daysLeft} day${daysLeft !== 1 ? "s" : ""} left until Marianna's birthday.`;
 
-// 🔓 Unlock logic
+// Buttons
 const task1Btn = document.getElementById("task1-btn");
 const task2Btn = document.getElementById("task2-btn");
 const task3Btn = document.getElementById("task3-btn");
 const task1 = document.getElementById("task1");
 const task2 = document.getElementById("task2");
 
-task1Btn.onclick = () => task1.classList.toggle("hidden");
-task2Btn.onclick = () => task2.classList.toggle("hidden");
-
-// 🧩 Day 1 Quiz Logic
-const quizData = [
-  {
-    question: "On the Elizabeth Line, what's the train station after Harold Hill?",
-    options: ["Gidea Park", "Punjabi Park", "Punani Park", "Tilted Towers"],
-    answer: 1
-  },
-  {
-    question: "What's 50% Turkish, 50% Polish, but 100% nicotine?",
-    options: ["Leo Tekker", "Turkish Delight", "That one guy from Fish Tails", "Gregorz"],
-    answer: 0
-  },
-  {
-    question: "What's my favourite song?",
-    options: [
-      "Slow Dancing in the Dark",
-      "Bimbo Doll",
-      "Palmtree Panic 'P' Mix",
-      "Friday Night",
-      "SCP 3008 Friday Theme",
-      "Can't Tell Me Nothing"
-    ],
-    answer: 0
-  },
-  {
-    question: "What's my dog's name?",
-    options: ["_____ and _____", "Buddy and Pepper", "Buddy and Peppa", "Denis and Antonio"],
-    answer: 2
-  },
-  {
-    question: "Why do I love Joji so much?",
-    options: [
-      "Because I'm an edgelord stuck in 2016",
-      "Because I think of you whenever I listen to him",
-      "Because I'm _____",
-      "Because Denis is _____",
-      "Because the pressures of society make me feel like I gotta be",
-      "Because I just like his music bro why you gotta hyper analyse everything man"
-    ],
-    answer: 1
-  },
-  {
-    question: "A pretty plant with petals is called what?",
-    options: ["Flower", "Flour"],
-    answer: 1
-  },
-  {
-    question: "Where was I raised?",
-    options: ["Durban", "Dirtbin", "Skunthrope", "Cape Town"],
-    answer: 0
-  },
-  {
-    question: "Excuse me, was you saying something?",
-    options: [
-      "Uh uh you can't tell me nothing",
-      "Denis is _____",
-      "Banjo Kazooie",
-      "Denis is _____"
-    ],
-    answer: 0
-  },
-  {
-    question: "What's my favourite game of all time?",
-    options: [
-      "Your Bizarre Adventure",
-      "Obby but you're on a bike",
-      "Super Mario Galaxy",
-      "Terraria",
-      "All of the above",
-      "Denis is _____"
-    ],
-    answer: 4
-  },
-  {
-   question: "How tall am I?",
-    options: ["5'2", "6'3", "190cm", "Denis is gay"],
-    answer: 2
-  }
-];
-const quizContainer = document.getElementById("quiz");
-const reward = document.getElementById("reward");
+// Sounds
 const correctSound = document.getElementById("correct-sound");
 const errorSound = document.getElementById("error-sound");
 const errorImage = document.getElementById("error-image");
 
+// Quiz
+const quizData = [/* insert formatted quiz questions here */];
+const quizContainer = document.getElementById("quiz");
+const reward = document.getElementById("reward");
 let currentQuestion = 0;
 
 function showQuestion(index) {
@@ -137,6 +58,7 @@ function handleAnswer(qIndex, selectedIndex, button) {
       setTimeout(() => showQuestion(currentQuestion), 1000);
     } else {
       reward.classList.remove("hidden");
+      task2Btn.disabled = false;
     }
   } else {
     button.classList.add("wrong");
@@ -152,11 +74,12 @@ function flashErrorImage() {
   }, 1000);
 }
 
-// Start quiz
-showQuestion(currentQuestion);
+task1Btn.onclick = () => {
+  task1.classList.toggle("hidden");
+  showQuestion(currentQuestion);
+};
 
-
-// 🎮 Day 2 Click Game Logic
+// Game
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const gameReward = document.getElementById("gameReward");
@@ -176,44 +99,4 @@ function drawHeads() {
     ctx.arc(head.x + 25, head.y + 25, 25, 0, Math.PI * 2);
     ctx.fillStyle = "#ffb6c1";
     ctx.fill();
-    head.y += 2;
-    if (head.y > canvas.height) heads.splice(index, 1);
-  });
-}
-
-canvas.onclick = (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-  const clickY = e.clientY - rect.top;
-
-  heads.forEach((head, index) => {
-    const dx = clickX - (head.x + 25);
-    const dy = clickY - (head.y + 25);
-    if (Math.sqrt(dx * dx + dy * dy) < 25) {
-      heads.splice(index, 1);
-      score2++;
-      correctSound.play();
-      confetti.start();
-      if (score2 >= 20 && !gameReward.classList.contains("shown")) {
-        gameReward.classList.remove("hidden");
-        gameReward.classList.add("shown");
-        task3Btn.disabled = false;
-      }
-    }
-  });
-};
-
-function gameLoop() {
-  if (!gameRunning) return;
-  drawHeads();
-  if (Math.random() < 0.05) spawnHead();
-  requestAnimationFrame(gameLoop);
-}
-
-task2Btn.onclick = () => {
-  task2.classList.toggle("hidden");
-  if (!gameRunning) {
-    gameRunning = true;
-    gameLoop();
-  }
-};
+    head.y +=
