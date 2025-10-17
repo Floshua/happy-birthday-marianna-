@@ -31,6 +31,10 @@ button:hover {
   transform: scale(1.05);
 }
 
+.hidden {
+  display: none;
+}
+
 #quiz .question {
   margin-bottom: 2rem;
 }
@@ -62,4 +66,10 @@ button:hover {
   width: 300px;
   opacity: 0.8;
   z-index: 999;
+}
+
+canvas {
+  border: 2px solid #ffd700;
+  background-color: #fff0f5;
+  margin-top: 1rem;
 }
