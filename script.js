@@ -90,21 +90,23 @@ const quizData = [
     answer: 4
   },
   {
-    question: "How tall am I?",
-    options: ["5'2", "6'3", "190cm", "Denis is _____"],
+   question: "How tall am I?",
+    options: ["5'2", "6'3", "190cm", "Denis is gay"],
     answer: 2
   }
+];
 const quizContainer = document.getElementById("quiz");
-const submitBtn = document.getElementById("submit");
-const resultContainer = document.getElementById("result");
 const reward = document.getElementById("reward");
 const correctSound = document.getElementById("correct-sound");
 const errorSound = document.getElementById("error-sound");
 const errorImage = document.getElementById("error-image");
 
-let score = 0;
+let currentQuestion = 0;
 
-quizData.forEach((q, index) => {
+function showQuestion(index) {
+  quizContainer.innerHTML = "";
+  const q = quizData[index];
+
   const questionDiv = document.createElement("div");
   questionDiv.classList.add("question");
 
@@ -121,18 +123,21 @@ quizData.forEach((q, index) => {
   });
 
   quizContainer.appendChild(questionDiv);
-});
+}
 
 function handleAnswer(qIndex, selectedIndex, button) {
   const correctIndex = quizData[qIndex].answer;
-  const alreadyAnswered = document.querySelectorAll(`#quiz .question:nth-child(${qIndex + 1}) .option.correct, .option.wrong`).length > 0;
-  if (alreadyAnswered) return;
 
   if (selectedIndex === correctIndex) {
     button.classList.add("correct");
     correctSound.play();
     confetti.start();
-    score++;
+    currentQuestion++;
+    if (currentQuestion < quizData.length) {
+      setTimeout(() => showQuestion(currentQuestion), 1000);
+    } else {
+      reward.classList.remove("hidden");
+    }
   } else {
     button.classList.add("wrong");
     errorSound.play();
@@ -147,15 +152,9 @@ function flashErrorImage() {
   }, 1000);
 }
 
-submitBtn.onclick = () => {
-  if (score === quizData.length) {
-    resultContainer.textContent = "🎉 All correct! Here's your message:";
-    reward.classList.remove("hidden");
-    task2Btn.disabled = false;
-  } else {
-    resultContainer.textContent = `You got ${score} out of ${quizData.length}. Try again!`;
-  }
-};
+// Start quiz
+showQuestion(currentQuestion);
+
 
 // 🎮 Day 2 Click Game Logic
 const canvas = document.getElementById("gameCanvas");
