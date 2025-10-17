@@ -19,7 +19,85 @@ const errorSound = document.getElementById("error-sound");
 const errorImage = document.getElementById("error-image");
 
 // Quiz
-const quizData = [/* insert formatted quiz questions here */];
+const quizData = [
+  {
+    question: "On the Elizabeth Line, what's the train station after Harold Hill?",
+    options: ["Gidea Park", "Punjabi Park", "Punani Park", "Tilted Towers"],
+    answer: 1
+  },
+  {
+    question: "What's 50% Turkish, 50% Polish, but 100% nicotine?",
+    options: ["Leo Tekker", "Turkish Delight", "That one nigga from shark Tails", "Gregorz"],
+    answer: 0
+  },
+  {
+    question: "What's my favourite song?",
+    options: [
+      "Slow Dancing in the Dark",
+      "Bimbo Doll",
+      "Palmtree Panic 'P' Mix",
+      "Friday Night",
+      "SCP 3008 Friday Theme",
+      "Can't Tell Me Nothing"
+    ],
+    answer: 0
+  },
+  {
+    question: "What's my dog's name?",
+    options: ["retard and faggot", "Buddy and Pepper", "Buddy and Peppa", "Denis and Antonio"],
+    answer: 2
+  },
+  {
+    question: "Why do I love Joji so much?",
+    options: [
+      "Because I'm an edgelord stuck in 2016",
+      "Because I think of you whenever I listen to him",
+      "Because I'm gay",
+      "Because Denis is gay",
+      "Because the pressures of society make me feel like I gotta be",
+      "Because I just like his music bro why you gotta hyper analyse everything man"
+    ],
+    answer: 1
+  },
+  {
+    question: "A pretty plant with petals is called what?",
+    options: ["Flower", "Flour"],
+    answer: 1
+  },
+  {
+    question: "Where was I raised?",
+    options: ["Durban", "Dirtbin", "Skunthrope", "Cape Town"],
+    answer: 0
+  },
+  {
+    question: "Excuse me, was you saying something?",
+    options: [
+      "Uh uh you can't tell me nothing",
+      "Denis is gay",
+      "Banjo Kazooie",
+      "Denis is gay"
+    ],
+    answer: 0
+  },
+  {
+    question: "What's my favourite game of all time?",
+    options: [
+      "Your Bizarre Adventure",
+      "Obby but you're on a bike",
+      "Super Mario Galaxy",
+      "Terraria",
+      "All of the above",
+      "Denis is gay"
+    ],
+    answer: 4
+  },
+  {
+    question: "How tall am I?",
+    options: ["5'2", "6'3", "190cm", "Denis is gay"],
+    answer: 2
+  }
+];
+
 const quizContainer = document.getElementById("quiz");
 const reward = document.getElementById("reward");
 let currentQuestion = 0;
