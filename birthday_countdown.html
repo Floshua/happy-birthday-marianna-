@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>3-Day Birthday Countdown</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#f59e0b;color:#e6eef8;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg),#071024);color:var(--accent);display:flex;align-items:center;justify-content:center}
+    .container{width:960px;max-width:96%;padding:24px}
+    .header{text-align:center;margin-bottom:18px}
+    h1{font-size:28px;margin:0;color:#fff}
+    p.lead{color:#cbd5e1}
+    .count{font-size:22px;background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;display:inline-block;margin-top:12px}
+    .days{display:flex;gap:12px;justify-content:center;margin-top:18px}
+    .day-card{background:var(--card);padding:14px;border-radius:12px;min-width:180px;text-align:center}
+    .locked{opacity:.4}
+    button.primary{background:var(--accent);color:#071024;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
+    .quiz{margin-top:12px}
+    .question{background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;margin-bottom:8px}
+    .choices{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    .choice{background:#0b122022;border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;cursor:pointer}
+    .hidden{display:none}
+    .message{margin-top:12px;color:#d1fae5}
+    #confetti-canvas{position:fixed;pointer-events:none;left:0;top:0;width:100%;height:100%;z-index:9999}
+    .flash-img{position:fixed;left:50%;top:20%;transform:translateX(-50%);opacity:.6;z-index:9998;pointer-events:none;width:320px;height:auto;border-radius:12px}
+    .big-embed{width:100%;height:360px;border-radius:12px;border:0}
+    footer{color:#94a3b8;margin-top:18px;text-align:center}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>3‑Day Countdown Surprise</h1>
+    <p class="lead">A small interactive gift — opens across three days. (Day 3 will unlock on the 26th.)</p>
+    <div class="count" id="countdown">Calculating...</div>
+  </div>
+
+  <div class="days">
+    <div class="day-card" id="day1">
+      <strong>Day 1</strong>
+      <div class="small">Quiz (5 questions)</div>
+      <div style="margin-top:8px"><button class="primary" id="openDay1">Open Day 1</button></div>
+      <div class="quiz hidden" id="quizArea">
+        <div id="quizContent"></div>
+        <div class="message" id="afterQuiz" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="day-card" id="day2">
+      <strong>Day 2</strong>
+      <div class="small">Mini game</div>
+      <div style="margin-top:8px"><button class="primary" id="openDay2">Open Day 2</button></div>
+      <div id="gameArea" class="hidden">
+        <p class="lead" style="color:#cbd5e1">Click the falling faces quickly! (Use your friend's face image URL in the config.)</p>
+        <canvas id="gameCanvas" width="640" height="240" style="background:linear-gradient(180deg,#071224,#02101a);border-radius:8px;display:block;margin:auto"></canvas>
+        <div style="text-align:center;margin-top:8px"><div id="gameScore">Score: 0</div></div>
+        <div id="afterGame" class="message hidden"></div>
+      </div>
+    </div>
+
+    <div class="day-card" id="day3">
+      <strong>Day 3</strong>
+      <div class="small">Final surprise (video)</div>
+      <div style="margin-top:8px"><button class="primary" id="openDay3">Open Day 3</button></div>
+      <div id="finalArea" class="hidden">
+        <div id="finalParagraph" class="message"></div>
+        <div style="margin-top:12px"><iframe id="videoEmbed" class="big-embed" src="" allowfullscreen></iframe></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Made with ❤️ — customise the assets and texts in the script configuration below.</footer>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+<img id="flashImg" class="flash-img hidden" src="" alt="flash"/>
+
+<script>
+/* ------------------ CONFIG (edit these) ------------------ */
+const config = {
+  // IMPORTANT: replace month/day/year below to the birthday you want. We'll auto-pick the next occurrence.
+  birthdayDay: 27, // day of month
+  birthdayMonth: null, // null => use next occurrence in the current month/year if upcoming; otherwise next month. Set 1-12 to force.
+  birthdayYear: null, // null => auto choose next occurrence
+
+  // Audio / assets: replace these with actual URLs (host them on your site or imgur/cloud storage)
+  correctSfx: 'https://cdn.jsdelivr.net/gh/jackocnr/intl-tel-input@master/examples/build/sounds/positive.mp3',
+  wrongSfx: 'https://cdn.jsdelivr.net/gh/jackocnr/intl-tel-input@master/examples/build/sounds/error.mp3',
+  friendFaceImage: '', // URL to friend's face image for day2 game
+  flashImage: '', // image to briefly flash on incorrect answer (semi-transparent)
+
+  // Paragraphs and final video (replace with your actual paragraphs and YT link)
+  day1Paragraph: `Day 1 paragraph goes here. Replace this text with the paragraph you supplied.`,
+  day1RewardHtml: `<div style="margin-top:8px;color:#fff">Reward: <strong>GIFT-CARD-CODE-EXAMPLE</strong></div>`,
+
+  day2Paragraph: `Day 2 paragraph goes here. Replace this text with the paragraph you supplied.`,
+  day2RewardHtml: `<div style="margin-top:8px;color:#fff">Reward: <strong>SMALL-SURPRISE-CODE</strong></div>`,
+
+  day3Paragraph: `Day 3 paragraph goes here. This will show above the embedded YouTube video.`,
+  day3YouTubeUrl: '', // e.g. https://www.youtube.com/watch?v=VIDEO_ID
+
+  // NOTE: Offensive language and slurs have been intentionally removed/sanitized here.
+};
+/* --------------------------------------------------------- */
+
+// Helper: pick the next occurrence of the birthday (uses Europe/London local time in the user's browser)
+function getTargetDate() {
+  const now = new Date();
+  let year = config.birthdayYear ?? now.getFullYear();
+  let month;
+  if (config.birthdayMonth) {
+    month = config.birthdayMonth - 1;
+  } else {
+    // try current month
+    month = now.getMonth();
+    let candidate = new Date(year, month, config.birthdayDay+0, 0,0,0);
+    if (candidate <= now) {
+      // if already passed this month's day, move to next month
+      month = (month + 1) % 12;
+      if (month === 0) year++;
+    }
+  }
+  return new Date(year, month, config.birthdayDay, 0, 0, 0);
+}
+
+const target = getTargetDate();
+// We want day1 = target - 3 days, day2 = target -2, day3 = target -1 (unlock on the day before the birthday)
+const day1Date = new Date(target.getTime()); day1Date.setDate(target.getDate() - 3);
+const day2Date = new Date(target.getTime()); day2Date.setDate(target.getDate() - 2);
+const day3Date = new Date(target.getTime()); day3Date.setDate(target.getDate() - 1);
+
+// Quiz data: SANITIZED: offensive options/messages removed or rephrased.
+// Keep the user's intended correct answers but avoid slurs or hateful language.
+const quizQuestions = [
+  {
+    q: "On the Elizabeth line what's the train station after Harold Hill?",
+    choices: ["Gidea Park","Punjabi Park","Punani Park","Tilted Towers"],
+    correctIndex: 1
+  },
+  {
+    q: "What's 50% Turkish 50% Polish but 100% nicotine?",
+    choices: ["Leo Tekker","Turkish Delight","That one character","Gregorz"],
+    correctIndex: 0
+  },
+  {
+    q: "What's my favourite song?",
+    choices: ["Slow Dancing in the Dark","Bimbo Doll","Palmtree Panic P mix","Friday Night","SCP 3008 Friday theme","Can't Tell Me Nothing"],
+    correctIndex: 0
+  },
+  {
+    q: "What's my dog's name?",
+    choices: ["Rex and Fifi","Buddy and Pepper","Buddy and Peppa","Denis and Antonio"],
+    correctIndex: 2
+  },
+  {
+    q: "Why do I love Joji so much?",
+    choices: ["Because I'm an edgelord stuck in 2016","Because I think of you whenever I listen to him","Personal reason","Because Denis is a meme","Because of society","Because I just like his music"],
+    correctIndex: 1
+  },
+  {
+    q: "A pretty plant with petals is called what?",
+    choices: ["Flower","Flour"],
+    correctIndex: 1
+  },
+  {
+    q: "Where was I raised?",
+    choices: ["Durban","Dirtbin","Skunthrope","Cape Town"],
+    correctIndex: 0
+  },
+  {
+    q: "Excuse me, was you saying something?",
+    choices: ["Uh uh you can't tell me nothing","Denis (meme)","Banjo-Kazooie","Denis (meme)"],
+    correctIndex: 0
+  },
+  {
+    q: "What's my favourite game of all time?",
+    choices: ["Your Bizarre Adventure","Obby but you're on a bike","Super Mario Galaxy","Terraria","All of the above","Denis (meme)"],
+    correctIndex: 4
+  },
+  {
+    q: "How tall am I?",
+    choices: ["6'2\"","6'3\"","190cm","Denis (meme)"],
+    correctIndex: 2
+  }
+];
+
+// Keep track of progress
+let answeredCorrect = 0;
+let answeredCount = 0;
+
+// Audio elements
+const correctAudio = new Audio(config.correctSfx);
+const wrongAudio = new Audio(config.wrongSfx);
+
+// Confetti simple implementation using canvas-confetti via CDN if available, otherwise a basic burst
+function burstConfetti() {
+  // try to use canvas-confetti if loaded
+  if (window.confetti) {
+    window.confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }});
+  } else {
+    // basic fallback: create a few colored dots that fade
+    const cvs = document.getElementById('confetti-canvas');
+    const ctx = cvs.getContext('2d');
+    cvs.width = innerWidth; cvs.height = innerHeight;
+    const pieces = [];
+    for (let i=0;i<120;i++){pieces.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height/2,dx:(Math.random()-0.5)*8,dy:Math.random()*6+2,alpha:1,r:Math.random()*4+2});}
+    const colors = ['#f59e0b','#34d399','#60a5fa','#f472b6','#f97316'];
+    const t = setInterval(()=>{
+      ctx.clearRect(0,0,cvs.width,cvs.height);
+      for(const p of pieces){ctx.fillStyle=colors[Math.floor(Math.random()*colors.length)];ctx.globalAlpha=p.alpha;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();p.x+=p.dx;p.y+=p.dy;p.alpha-=0.02}
+      if (pieces.every(p=>p.alpha<=0)){clearInterval(t);ctx.clearRect(0,0,cvs.width,cvs.height)}
+    },16);
+  }
+}
+
+function showFlashImage() {
+  if (!config.flashImage) return;
+  const img = document.getElementById('flashImg');
+  img.src = config.flashImage; img.classList.remove('hidden');
+  setTimeout(()=>img.classList.add('hidden'),900);
+}
+
+// Build quiz UI
+function renderQuiz() {
+  const container = document.getElementById('quizContent');
+  container.innerHTML = '';
+  // Use only 5 questions: first 5 from the list
+  const qset = quizQuestions.slice(0,5);
+  qset.forEach((q,i)=>{
+    const div = document.createElement('div'); div.className='question';
+    div.innerHTML = `<strong>Q${i+1}.</strong> ${q.q}`;
+    const choices = document.createElement('div'); choices.className='choices';
+    q.choices.forEach((c,j)=>{
+      const btn = document.createElement('div'); btn.className='choice'; btn.tabIndex=0; btn.innerText = c;
+      btn.addEventListener('click',()=>handleChoice(i,j,btn));
+      choices.appendChild(btn);
+    });
+    div.appendChild(choices);
+    container.appendChild(div);
+  });
+}
+
+function handleChoice(qIndex, choiceIndex, el) {
+  const q = quizQuestions[qIndex];
+  // prevent multiple answering the same question by disabling its choices after click
+  const parent = el.parentNode; // choices
+  if (parent.getAttribute('data-answered')) return;
+  parent.setAttribute('data-answered','1');
+  answeredCount++;
+  if (choiceIndex === q.correctIndex) {
+    answeredCorrect++;
+    correctAudio.play().catch(()=>{});
+    burstConfetti();
+    el.style.outline='3px solid rgba(255,255,255,0.08)';
+    el.innerHTML += ' ✅';
+  } else {
+    wrongAudio.play().catch(()=>{});
+    showFlashImage();
+    // sanitized error message
+    const msg = document.createElement('div'); msg.style.color='#fecaca'; msg.style.marginTop='6px'; msg.innerText = 'Wrong choice — try again!';
+    parent.appendChild(msg);
+  }
+
+  // if all 5 questions answered, reveal paragraph/reward after a short delay
+  if (answeredCount >= 5) {
+    setTimeout(()=>{
+      const area = document.getElementById('afterQuiz');
+      area.style.display='block';
+      // show paragraph only if at least 1 correct (you can change the rule here)
+      area.innerHTML = `<div style="color:#fff">${config.day1Paragraph}</div>${config.day1RewardHtml}`;
+    },900);
+  }
+}
+
+// Game for day2: falling face clicker
+function startGame() {
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let score = 0; document.getElementById('gameScore').innerText='Score: 0';
+  const face = new Image(); face.src = config.friendFaceImage || '';
+  const objects = [];
+  let running = true;
+  function spawn(){ objects.push({x:Math.random()*(W-60)+30,y:-40,vy:1+Math.random()*2,size:48}); }
+  const sp = setInterval(()=>{ if(running) spawn(); },700);
+  function update(){ if(!running) return; ctx.clearRect(0,0,W,H); for(const o of objects){ o.y += o.vy; ctx.drawImage(face,o.x,o.y,o.size,o.size); } objects.filter(o=>o.y>H+60).forEach(o=>{ const idx = objects.indexOf(o); if(idx>=0) objects.splice(idx,1); }); requestAnimationFrame(update); }
+  update();
+  canvas.addEventListener('click',(ev)=>{
+    const rect = canvas.getBoundingClientRect(); const mx = ev.clientX-rect.left, my = ev.clientY-rect.top;
+    for(let i=objects.length-1;i>=0;i--){ const o = objects[i]; if(mx>=o.x && mx<=o.x+o.size && my>=o.y && my<=o.y+o.size){ objects.splice(i,1); score++; document.getElementById('gameScore').innerText='Score: '+score; correctAudio.play().catch(()=>{}); burstConfetti(); if(score>=10){ // win condition
+          running=false; clearInterval(sp); document.getElementById('afterGame').classList.remove('hidden'); document.getElementById('afterGame').innerHTML = config.day2Paragraph + config.day2RewardHtml;
+        } break; } }
+  });
+}
+
+// Final area
+function openFinal() {
+  document.getElementById('finalArea').classList.remove('hidden');
+  document.getElementById('finalParagraph').innerText = config.day3Paragraph;
+  const iframe = document.getElementById('videoEmbed');
+  if (config.day3YouTubeUrl) {
+    // convert to embed link
+    let vid = config.day3YouTubeUrl;
+    const m = vid.match(/[?&]v=([^&]+)/);
+    if (m && m[1]) vid = m[1];
+    // if user provided a plain id, use it
+    if (vid.indexOf('http')===-1) iframe.src = `https://www.youtube.com/embed/${vid}`; else iframe.src = `https://www.youtube.com/embed/${m?m[1]:vid}`;
+  }
+}
+
+// UI wiring and unlocking logic
+function updateCountdown() {
+  const now = new Date();
+  const diff = target - now;
+  if (diff<=0) { document.getElementById('countdown').innerText = 'Happy birthday!'; return; }
+  const days = Math.floor(diff/86400000); const hours = Math.floor((diff%86400000)/3600000); const mins = Math.floor((diff%3600000)/60000); const secs = Math.floor((diff%60000)/1000);
+  document.getElementById('countdown').innerText = `${days}d ${hours}h ${mins}m ${secs}s until ${target.toDateString()}`;
+
+  // enable/disable buttons based on local date
+  const today = new Date();
+  if (today >= day1Date) document.getElementById('openDay1').disabled=false; else document.getElementById('openDay1').disabled=true;
+  if (today >= day2Date) document.getElementById('openDay2').disabled=false; else document.getElementById('openDay2').disabled=true;
+  if (today >= day3Date) document.getElementById('openDay3').disabled=false; else document.getElementById('openDay3').disabled=true;
+}
+
+setInterval(updateCountdown,1000); updateCountdown();
+
+// button handlers
+document.getElementById('openDay1').addEventListener('click',()=>{
+  document.getElementById('quizArea').classList.toggle('hidden'); renderQuiz();
+});
+
+document.getElementById('openDay2').addEventListener('click',()=>{
+  const ga = document.getElementById('gameArea'); ga.classList.toggle('hidden'); if(!ga.classList.contains('hidden')) startGame();
+});
+
+document.getElementById('openDay3').addEventListener('click',()=>{
+  openFinal();
+});
+
+// try to load canvas-confetti library for nicer confetti
+(function(){ const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js'; s.onload=()=>{console.log('confetti ready');}; document.head.appendChild(s); })();
+
+</script>
+</body>
+</html>
