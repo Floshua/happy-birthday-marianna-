@@ -79,29 +79,17 @@
 <script>
 /* ------------------ CONFIG (edit these) ------------------ */
 const config = {
-  // IMPORTANT: replace month/day/year below to the birthday you want. We'll auto-pick the next occurrence.
-  birthdayDay: 27, // day of month
-  birthdayMonth: null, // null => use next occurrence in the current month/year if upcoming; otherwise next month. Set 1-12 to force.
-  birthdayYear: null, // null => auto choose next occurrence
+  // Set the birthday explicitly so Day1 = 24th, Day2 = 25th, Day3 = 26th for October 2025
+  birthdayDay: 27,
+  birthdayMonth: 10,
+  birthdayYear: 2025,
 
-  // Audio / assets: replace these with actual URLs (host them on your site or imgur/cloud storage)
-  correctSfx: 'https://cdn.jsdelivr.net/gh/jackocnr/intl-tel-input@master/examples/build/sounds/positive.mp3',
-  wrongSfx: 'https://cdn.jsdelivr.net/gh/jackocnr/intl-tel-input@master/examples/build/sounds/error.mp3',
-  friendFaceImage: '', // URL to friend's face image for day2 game
-  flashImage: '', // image to briefly flash on incorrect answer (semi-transparent)
-
-  // Paragraphs and final video (replace with your actual paragraphs and YT link)
-  day1Paragraph: `Day 1 paragraph goes here. Replace this text with the paragraph you supplied.`,
-  day1RewardHtml: `<div style="margin-top:8px;color:#fff">Reward: <strong>GIFT-CARD-CODE-EXAMPLE</strong></div>`,
-
-  day2Paragraph: `Day 2 paragraph goes here. Replace this text with the paragraph you supplied.`,
-  day2RewardHtml: `<div style="margin-top:8px;color:#fff">Reward: <strong>SMALL-SURPRISE-CODE</strong></div>`,
-
-  day3Paragraph: `Day 3 paragraph goes here. This will show above the embedded YouTube video.`,
-  day3YouTubeUrl: '', // e.g. https://www.youtube.com/watch?v=VIDEO_ID
-
-  // NOTE: Offensive language and slurs have been intentionally removed/sanitized here.
-};
+  // Audio / assets: local uploaded filenames (when you host this, update to hosted URLs)
+  correctSfx: '/mnt/data/Puzzle Solved (The Legend of Zelda Breath of the Wild OST) - Keri (youtube).mp3',
+  wrongSfx: '/mnt/data/Osaka omaga sound effect - Amend (youtube).mp3',
+  backgroundMusic: '/mnt/data/Comet Observatory 3 - Super Mario Galaxy Music - Extended - Musical Toasters (youtube).mp3',
+  friendFaceImage: 'https://freeimage.host/i/KvCllnt',
+  flashImage: 'data:image/jpeg;base64,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
 /* --------------------------------------------------------- */
 
 // Helper: pick the next occurrence of the birthday (uses Europe/London local time in the user's browser)
@@ -345,3 +333,4 @@ document.getElementById('openDay3').addEventListener('click',()=>{
 </script>
 </body>
 </html>
+
