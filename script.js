@@ -42,7 +42,7 @@ const quizData = [
   },
   {
     question: "What's my dog's name?",
-    options: ["retard and faggot", "Buddy and Pepper", "Buddy and Peppa", "Denis and Antonio"],
+    options: ["_____ and _____", "Buddy and Pepper", "Buddy and Peppa", "Denis and Antonio"],
     answer: 2
   },
   {
@@ -50,8 +50,8 @@ const quizData = [
     options: [
       "Because I'm an edgelord stuck in 2016",
       "Because I think of you whenever I listen to him",
-      "Because I'm gay",
-      "Because Denis is gay",
+      "Because I'm _____",
+      "Because Denis is _____",
       "Because the pressures of society make me feel like I gotta be",
       "Because I just like his music bro why you gotta hyper analyse everything man"
     ],
@@ -71,9 +71,9 @@ const quizData = [
     question: "Excuse me, was you saying something?",
     options: [
       "Uh uh you can't tell me nothing",
-      "Denis is gay",
+      "Denis is _____",
       "Banjo Kazooie",
-      "Denis is gay"
+      "Denis is _____"
     ],
     answer: 0
   },
@@ -85,16 +85,15 @@ const quizData = [
       "Super Mario Galaxy",
       "Terraria",
       "All of the above",
-      "Denis is gay"
+      "Denis is _____"
     ],
     answer: 4
   },
   {
     question: "How tall am I?",
-    options: ["5'2", "6'3", "190cm", "Denis is gay"],
+    options: ["5'2", "6'3", "190cm", "Denis is _____"],
     answer: 2
   }
-];
 const quizContainer = document.getElementById("quiz");
 const submitBtn = document.getElementById("submit");
 const resultContainer = document.getElementById("result");
