@@ -1,336 +1,54 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>3-Day Birthday Countdown</title>
-  <style>
-    :root{--bg:#0f172a;--card:#0b1220;--accent:#f59e0b;color:#e6eef8;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
-    body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg),#071024);color:var(--accent);display:flex;align-items:center;justify-content:center}
-    .container{width:960px;max-width:96%;padding:24px}
-    .header{text-align:center;margin-bottom:18px}
-    h1{font-size:28px;margin:0;color:#fff}
-    p.lead{color:#cbd5e1}
-    .count{font-size:22px;background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;display:inline-block;margin-top:12px}
-    .days{display:flex;gap:12px;justify-content:center;margin-top:18px}
-    .day-card{background:var(--card);padding:14px;border-radius:12px;min-width:180px;text-align:center}
-    .locked{opacity:.4}
-    button.primary{background:var(--accent);color:#071024;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
-    .quiz{margin-top:12px}
-    .question{background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;margin-bottom:8px}
-    .choices{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-    .choice{background:#0b122022;border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;cursor:pointer}
-    .hidden{display:none}
-    .message{margin-top:12px;color:#d1fae5}
-    #confetti-canvas{position:fixed;pointer-events:none;left:0;top:0;width:100%;height:100%;z-index:9999}
-    .flash-img{position:fixed;left:50%;top:20%;transform:translateX(-50%);opacity:.6;z-index:9998;pointer-events:none;width:320px;height:auto;border-radius:12px}
-    .big-embed{width:100%;height:360px;border-radius:12px;border:0}
-    footer{color:#94a3b8;margin-top:18px;text-align:center}
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Countdown</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1>3‑Day Countdown Surprise</h1>
-    <p class="lead">A small interactive gift — opens across three days. (Day 3 will unlock on the 26th.)</p>
-    <div class="count" id="countdown">Calculating...</div>
+  <div class="container">
+    <h1>🎀 Birthday Countdown</h1>
+    <p id="countdown"></p>
+
+    <div class="task-buttons">
+      <button id="task1-btn">Day 1: Quiz</button>
+      <button id="task2-btn" disabled>Day 2: Click Game</button>
+      <button id="task3-btn" disabled>Day 3: Final Message</button>
+    </div>
+
+    <!-- Day 1 Quiz -->
+    <div id="task1" class="hidden">
+      <h2>🧩 Day 1: Quiz</h2>
+      <div id="quiz"></div>
+      <button id="submit">Submit Answers</button>
+      <div id="result"></div>
+      <div id="reward" class="hidden">
+        <p>[Insert sentimental paragraph here]</p>
+        <div class="gift-card">
+          <h3>🎁 Your Gift</h3>
+          <div class="gift-placeholder"><em>[Gift card placeholder]</em></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 2 Game -->
+    <div id="task2" class="hidden">
+      <h2>🎮 Day 2: Click Game</h2>
+      <p>Click 20 falling heads to unlock your reward!</p>
+      <canvas id="gameCanvas" width="400" height="600"></canvas>
+      <div id="gameReward" class="hidden">
+        <p>[Insert sentimental paragraph for Day 2]</p>
+        <img src="assets/images/drawing.jpg" alt="Your drawing" />
+      </div>
+    </div>
+
+    <img id="error-image" src="assets/images/ragebait.png" class="hidden" />
+    <audio id="correct-sound" src="assets/sounds/correct.mp3"></audio>
+    <audio id="error-sound" src="assets/sounds/error.mp3"></audio>
+    <script src="assets/confetti.js"></script>
+    <script src="script.js"></script>
   </div>
-
-  <div class="days">
-    <div class="day-card" id="day1">
-      <strong>Day 1</strong>
-      <div class="small">Quiz (5 questions)</div>
-      <div style="margin-top:8px"><button class="primary" id="openDay1">Open Day 1</button></div>
-      <div class="quiz hidden" id="quizArea">
-        <div id="quizContent"></div>
-        <div class="message" id="afterQuiz" style="display:none"></div>
-      </div>
-    </div>
-
-    <div class="day-card" id="day2">
-      <strong>Day 2</strong>
-      <div class="small">Mini game</div>
-      <div style="margin-top:8px"><button class="primary" id="openDay2">Open Day 2</button></div>
-      <div id="gameArea" class="hidden">
-        <p class="lead" style="color:#cbd5e1">Click the falling faces quickly! (Use your friend's face image URL in the config.)</p>
-        <canvas id="gameCanvas" width="640" height="240" style="background:linear-gradient(180deg,#071224,#02101a);border-radius:8px;display:block;margin:auto"></canvas>
-        <div style="text-align:center;margin-top:8px"><div id="gameScore">Score: 0</div></div>
-        <div id="afterGame" class="message hidden"></div>
-      </div>
-    </div>
-
-    <div class="day-card" id="day3">
-      <strong>Day 3</strong>
-      <div class="small">Final surprise (video)</div>
-      <div style="margin-top:8px"><button class="primary" id="openDay3">Open Day 3</button></div>
-      <div id="finalArea" class="hidden">
-        <div id="finalParagraph" class="message"></div>
-        <div style="margin-top:12px"><iframe id="videoEmbed" class="big-embed" src="" allowfullscreen></iframe></div>
-      </div>
-    </div>
-  </div>
-
-  <footer>Made with ❤️ — customise the assets and texts in the script configuration below.</footer>
-</div>
-
-<canvas id="confetti-canvas"></canvas>
-<img id="flashImg" class="flash-img hidden" src="" alt="flash"/>
-
-<script>
-/* ------------------ CONFIG (edit these) ------------------ */
-const config = {
-  // Set the birthday explicitly so Day1 = 24th, Day2 = 25th, Day3 = 26th for October 2025
-  birthdayDay: 27,
-  birthdayMonth: 10,
-  birthdayYear: 2025,
-
-  // Audio / assets: local uploaded filenames (when you host this, update to hosted URLs)
-  correctSfx: '/mnt/data/Puzzle Solved (The Legend of Zelda Breath of the Wild OST) - Keri (youtube).mp3',
-  wrongSfx: '/mnt/data/Osaka omaga sound effect - Amend (youtube).mp3',
-  backgroundMusic: '/mnt/data/Comet Observatory 3 - Super Mario Galaxy Music - Extended - Musical Toasters (youtube).mp3',
-  friendFaceImage: 'https://freeimage.host/i/KvCllnt',
-  flashImage: 'data:image/jpeg;base64,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
-/* --------------------------------------------------------- */
-
-// Helper: pick the next occurrence of the birthday (uses Europe/London local time in the user's browser)
-function getTargetDate() {
-  const now = new Date();
-  let year = config.birthdayYear ?? now.getFullYear();
-  let month;
-  if (config.birthdayMonth) {
-    month = config.birthdayMonth - 1;
-  } else {
-    // try current month
-    month = now.getMonth();
-    let candidate = new Date(year, month, config.birthdayDay+0, 0,0,0);
-    if (candidate <= now) {
-      // if already passed this month's day, move to next month
-      month = (month + 1) % 12;
-      if (month === 0) year++;
-    }
-  }
-  return new Date(year, month, config.birthdayDay, 0, 0, 0);
-}
-
-const target = getTargetDate();
-// We want day1 = target - 3 days, day2 = target -2, day3 = target -1 (unlock on the day before the birthday)
-const day1Date = new Date(target.getTime()); day1Date.setDate(target.getDate() - 3);
-const day2Date = new Date(target.getTime()); day2Date.setDate(target.getDate() - 2);
-const day3Date = new Date(target.getTime()); day3Date.setDate(target.getDate() - 1);
-
-// Quiz data: SANITIZED: offensive options/messages removed or rephrased.
-// Keep the user's intended correct answers but avoid slurs or hateful language.
-const quizQuestions = [
-  {
-    q: "On the Elizabeth line what's the train station after Harold Hill?",
-    choices: ["Gidea Park","Punjabi Park","Punani Park","Tilted Towers"],
-    correctIndex: 1
-  },
-  {
-    q: "What's 50% Turkish 50% Polish but 100% nicotine?",
-    choices: ["Leo Tekker","Turkish Delight","That one character","Gregorz"],
-    correctIndex: 0
-  },
-  {
-    q: "What's my favourite song?",
-    choices: ["Slow Dancing in the Dark","Bimbo Doll","Palmtree Panic P mix","Friday Night","SCP 3008 Friday theme","Can't Tell Me Nothing"],
-    correctIndex: 0
-  },
-  {
-    q: "What's my dog's name?",
-    choices: ["Rex and Fifi","Buddy and Pepper","Buddy and Peppa","Denis and Antonio"],
-    correctIndex: 2
-  },
-  {
-    q: "Why do I love Joji so much?",
-    choices: ["Because I'm an edgelord stuck in 2016","Because I think of you whenever I listen to him","Personal reason","Because Denis is a meme","Because of society","Because I just like his music"],
-    correctIndex: 1
-  },
-  {
-    q: "A pretty plant with petals is called what?",
-    choices: ["Flower","Flour"],
-    correctIndex: 1
-  },
-  {
-    q: "Where was I raised?",
-    choices: ["Durban","Dirtbin","Skunthrope","Cape Town"],
-    correctIndex: 0
-  },
-  {
-    q: "Excuse me, was you saying something?",
-    choices: ["Uh uh you can't tell me nothing","Denis (meme)","Banjo-Kazooie","Denis (meme)"],
-    correctIndex: 0
-  },
-  {
-    q: "What's my favourite game of all time?",
-    choices: ["Your Bizarre Adventure","Obby but you're on a bike","Super Mario Galaxy","Terraria","All of the above","Denis (meme)"],
-    correctIndex: 4
-  },
-  {
-    q: "How tall am I?",
-    choices: ["6'2\"","6'3\"","190cm","Denis (meme)"],
-    correctIndex: 2
-  }
-];
-
-// Keep track of progress
-let answeredCorrect = 0;
-let answeredCount = 0;
-
-// Audio elements
-const correctAudio = new Audio(config.correctSfx);
-const wrongAudio = new Audio(config.wrongSfx);
-
-// Confetti simple implementation using canvas-confetti via CDN if available, otherwise a basic burst
-function burstConfetti() {
-  // try to use canvas-confetti if loaded
-  if (window.confetti) {
-    window.confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }});
-  } else {
-    // basic fallback: create a few colored dots that fade
-    const cvs = document.getElementById('confetti-canvas');
-    const ctx = cvs.getContext('2d');
-    cvs.width = innerWidth; cvs.height = innerHeight;
-    const pieces = [];
-    for (let i=0;i<120;i++){pieces.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height/2,dx:(Math.random()-0.5)*8,dy:Math.random()*6+2,alpha:1,r:Math.random()*4+2});}
-    const colors = ['#f59e0b','#34d399','#60a5fa','#f472b6','#f97316'];
-    const t = setInterval(()=>{
-      ctx.clearRect(0,0,cvs.width,cvs.height);
-      for(const p of pieces){ctx.fillStyle=colors[Math.floor(Math.random()*colors.length)];ctx.globalAlpha=p.alpha;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();p.x+=p.dx;p.y+=p.dy;p.alpha-=0.02}
-      if (pieces.every(p=>p.alpha<=0)){clearInterval(t);ctx.clearRect(0,0,cvs.width,cvs.height)}
-    },16);
-  }
-}
-
-function showFlashImage() {
-  if (!config.flashImage) return;
-  const img = document.getElementById('flashImg');
-  img.src = config.flashImage; img.classList.remove('hidden');
-  setTimeout(()=>img.classList.add('hidden'),900);
-}
-
-// Build quiz UI
-function renderQuiz() {
-  const container = document.getElementById('quizContent');
-  container.innerHTML = '';
-  // Use only 5 questions: first 5 from the list
-  const qset = quizQuestions.slice(0,5);
-  qset.forEach((q,i)=>{
-    const div = document.createElement('div'); div.className='question';
-    div.innerHTML = `<strong>Q${i+1}.</strong> ${q.q}`;
-    const choices = document.createElement('div'); choices.className='choices';
-    q.choices.forEach((c,j)=>{
-      const btn = document.createElement('div'); btn.className='choice'; btn.tabIndex=0; btn.innerText = c;
-      btn.addEventListener('click',()=>handleChoice(i,j,btn));
-      choices.appendChild(btn);
-    });
-    div.appendChild(choices);
-    container.appendChild(div);
-  });
-}
-
-function handleChoice(qIndex, choiceIndex, el) {
-  const q = quizQuestions[qIndex];
-  // prevent multiple answering the same question by disabling its choices after click
-  const parent = el.parentNode; // choices
-  if (parent.getAttribute('data-answered')) return;
-  parent.setAttribute('data-answered','1');
-  answeredCount++;
-  if (choiceIndex === q.correctIndex) {
-    answeredCorrect++;
-    correctAudio.play().catch(()=>{});
-    burstConfetti();
-    el.style.outline='3px solid rgba(255,255,255,0.08)';
-    el.innerHTML += ' ✅';
-  } else {
-    wrongAudio.play().catch(()=>{});
-    showFlashImage();
-    // sanitized error message
-    const msg = document.createElement('div'); msg.style.color='#fecaca'; msg.style.marginTop='6px'; msg.innerText = 'Wrong choice — try again!';
-    parent.appendChild(msg);
-  }
-
-  // if all 5 questions answered, reveal paragraph/reward after a short delay
-  if (answeredCount >= 5) {
-    setTimeout(()=>{
-      const area = document.getElementById('afterQuiz');
-      area.style.display='block';
-      // show paragraph only if at least 1 correct (you can change the rule here)
-      area.innerHTML = `<div style="color:#fff">${config.day1Paragraph}</div>${config.day1RewardHtml}`;
-    },900);
-  }
-}
-
-// Game for day2: falling face clicker
-function startGame() {
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  let score = 0; document.getElementById('gameScore').innerText='Score: 0';
-  const face = new Image(); face.src = config.friendFaceImage || '';
-  const objects = [];
-  let running = true;
-  function spawn(){ objects.push({x:Math.random()*(W-60)+30,y:-40,vy:1+Math.random()*2,size:48}); }
-  const sp = setInterval(()=>{ if(running) spawn(); },700);
-  function update(){ if(!running) return; ctx.clearRect(0,0,W,H); for(const o of objects){ o.y += o.vy; ctx.drawImage(face,o.x,o.y,o.size,o.size); } objects.filter(o=>o.y>H+60).forEach(o=>{ const idx = objects.indexOf(o); if(idx>=0) objects.splice(idx,1); }); requestAnimationFrame(update); }
-  update();
-  canvas.addEventListener('click',(ev)=>{
-    const rect = canvas.getBoundingClientRect(); const mx = ev.clientX-rect.left, my = ev.clientY-rect.top;
-    for(let i=objects.length-1;i>=0;i--){ const o = objects[i]; if(mx>=o.x && mx<=o.x+o.size && my>=o.y && my<=o.y+o.size){ objects.splice(i,1); score++; document.getElementById('gameScore').innerText='Score: '+score; correctAudio.play().catch(()=>{}); burstConfetti(); if(score>=10){ // win condition
-          running=false; clearInterval(sp); document.getElementById('afterGame').classList.remove('hidden'); document.getElementById('afterGame').innerHTML = config.day2Paragraph + config.day2RewardHtml;
-        } break; } }
-  });
-}
-
-// Final area
-function openFinal() {
-  document.getElementById('finalArea').classList.remove('hidden');
-  document.getElementById('finalParagraph').innerText = config.day3Paragraph;
-  const iframe = document.getElementById('videoEmbed');
-  if (config.day3YouTubeUrl) {
-    // convert to embed link
-    let vid = config.day3YouTubeUrl;
-    const m = vid.match(/[?&]v=([^&]+)/);
-    if (m && m[1]) vid = m[1];
-    // if user provided a plain id, use it
-    if (vid.indexOf('http')===-1) iframe.src = `https://www.youtube.com/embed/${vid}`; else iframe.src = `https://www.youtube.com/embed/${m?m[1]:vid}`;
-  }
-}
-
-// UI wiring and unlocking logic
-function updateCountdown() {
-  const now = new Date();
-  const diff = target - now;
-  if (diff<=0) { document.getElementById('countdown').innerText = 'Happy birthday!'; return; }
-  const days = Math.floor(diff/86400000); const hours = Math.floor((diff%86400000)/3600000); const mins = Math.floor((diff%3600000)/60000); const secs = Math.floor((diff%60000)/1000);
-  document.getElementById('countdown').innerText = `${days}d ${hours}h ${mins}m ${secs}s until ${target.toDateString()}`;
-
-  // enable/disable buttons based on local date
-  const today = new Date();
-  if (today >= day1Date) document.getElementById('openDay1').disabled=false; else document.getElementById('openDay1').disabled=true;
-  if (today >= day2Date) document.getElementById('openDay2').disabled=false; else document.getElementById('openDay2').disabled=true;
-  if (today >= day3Date) document.getElementById('openDay3').disabled=false; else document.getElementById('openDay3').disabled=true;
-}
-
-setInterval(updateCountdown,1000); updateCountdown();
-
-// button handlers
-document.getElementById('openDay1').addEventListener('click',()=>{
-  document.getElementById('quizArea').classList.toggle('hidden'); renderQuiz();
-});
-
-document.getElementById('openDay2').addEventListener('click',()=>{
-  const ga = document.getElementById('gameArea'); ga.classList.toggle('hidden'); if(!ga.classList.contains('hidden')) startGame();
-});
-
-document.getElementById('openDay3').addEventListener('click',()=>{
-  openFinal();
-});
-
-// try to load canvas-confetti library for nicer confetti
-(function(){ const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js'; s.onload=()=>{console.log('confetti ready');}; document.head.appendChild(s); })();
-
-</script>
 </body>
 </html>
 
