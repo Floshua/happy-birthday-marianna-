@@ -1,23 +1,51 @@
-<!-- Background music -->
-<audio id="bg-music" src="assets/sounds/background.mp3" autoplay loop></audio>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Countdown</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <audio id="bg-music" src="assets/sounds/background.mp3" autoplay loop></audio>
 
-<!-- Quiz container -->
-<div id="task1" class="hidden">
-  <h2>Day 1: Quiz</h2>
-  <div id="quiz"></div>
-  <div id="reward" class="hidden">
-    <p>[Insert sentimental paragraph here]</p>
-    <div class="gift-card">
-      <h3>Your Gift</h3>
-      <div class="gift-placeholder"><em>[Gift card placeholder]</em></div>
+  <div class="container">
+    <h1>Birthday Countdown</h1>
+    <p id="countdown"></p>
+
+    <div class="task-buttons">
+      <button id="task1-btn">Day 1: Quiz</button>
+      <button id="task2-btn" disabled>Day 2: Click Game</button>
+      <button id="task3-btn" disabled>Day 3: Final Message</button>
     </div>
+
+    <div id="task1" class="hidden">
+      <h2>Day 1: Quiz</h2>
+      <div id="quiz"></div>
+      <div id="reward" class="hidden">
+        <p>[Insert sentimental paragraph here]</p>
+        <div class="gift-card">
+          <h3>Your Gift</h3>
+          <div class="gift-placeholder"><em>[Gift card placeholder]</em></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="task2" class="hidden">
+      <h2>Day 2: Click Game</h2>
+      <p>Click 20 falling heads to unlock your reward!</p>
+      <canvas id="gameCanvas" width="400" height="600"></canvas>
+      <div id="gameReward" class="hidden">
+        <p>[Insert sentimental paragraph for Day 2]</p>
+        <img src="assets/images/drawing.jpg" alt="Your drawing" />
+      </div>
+    </div>
+
+    <img id="error-image" src="assets/images/ragebait.png" class="hidden" />
+    <audio id="correct-sound" src="assets/sounds/correct.mp3"></audio>
+    <audio id="error-sound" src="assets/sounds/error.mp3"></audio>
+    <script src="assets/confetti.js"></script>
+    <script src="script.js"></script>
   </div>
-</div>
-
-<!-- Feedback image -->
-<img id="error-image" src="assets/images/ragebait.png" class="hidden" />
-
-<!-- Sounds -->
-<audio id="correct-sound" src="assets/sounds/correct.mp3"></audio>
-<audio id="error-sound" src="assets/sounds/error.mp3"></audio>
-
+</body>
+</html>
